@@ -1,7 +1,7 @@
 # OctoEngine
-Simple game engine build on top of SDL2 that is being developed as a learning project.
+Simple game engine build on top of SDL2 (because Im constantly switching environments - juggling win, mac and linux platforms) that is being developed as a learning project.
 
 Dependencies:
 
-spdlog
-SDL2
+ - spdlog (https://github.com/gabime/spdlog) --> INCLUDED 
+ - SDL2 (https://www.libsdl.org/download-2.0.php)
