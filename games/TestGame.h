@@ -8,7 +8,7 @@
 #ifndef TestGame_h
 #define TestGame_h
 
-#include "engine/Octo.h"
+#include "../engine/Octo.h"
 
 
 class TestGame : public Octo::Game, public Octo::IObserver<Octo::KeyUpEvent>
