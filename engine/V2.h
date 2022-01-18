@@ -49,6 +49,14 @@ namespace Octo
 		{
             return *this = *this / scalar;
 		}
+        bool operator ==(const Vec2& rhs) const
+        {
+            return abs(X - rhs.X) < std::numeric_limits<T>::epsilon() && abs(Y - rhs.Y) < std::numeric_limits<T>::epsilon();
+        }
+        bool operator !=(const Vec2& rhs) const
+        {
+            return !(*this == rhs);
+        }
 		float GetMagnitude() const
 		{
 			return std::sqrtf(X * X + Y * Y);

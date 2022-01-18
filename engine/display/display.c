@@ -1,14 +1,13 @@
 #include "display.h"
 
-SDL_Window* window = NULL;
-SDL_Renderer* renderer = NULL;
-uint32_t* colorBuffer = NULL;
-SDL_Texture* colorBufferTexture = NULL;
-int windowWidth = 1920;
-int windowHeight = 1080;
+SDL_Window* Octo_window = NULL;
+SDL_Renderer* Octo_renderer = NULL;
+uint32_t* Octo_colorBuffer = NULL;
+SDL_Texture* Octo_colorBufferTexture = NULL;
+int Octo_windowWidth = 1920;
+int Octo_windowHeight = 1080;
 
-
-bool initializeWindow(bool fullScreen) {
+bool Octo_initializeWindow(bool fullScreen) {
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
         fprintf(stderr, "Error initializing SDL.\n");
         return false;
@@ -17,27 +16,27 @@ bool initializeWindow(bool fullScreen) {
     if (fullScreen == true) {
         SDL_DisplayMode displayMode;
         SDL_GetCurrentDisplayMode(0, &displayMode);
-        windowWidth = displayMode.w;
-        windowHeight = displayMode.h;
+        Octo_windowWidth = displayMode.w;
+        Octo_windowHeight = displayMode.h;
     }
 
     // Create a SDL Window
-    window = SDL_CreateWindow(
+    Octo_window = SDL_CreateWindow(
         NULL,
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
-        windowWidth,
-        windowHeight,
+        Octo_windowWidth,
+        Octo_windowHeight,
         SDL_WINDOW_BORDERLESS
     );
-    if (!window) {
+    if (!Octo_window) {
         fprintf(stderr, "Error creating SDL window.\n");
         return false;
     }
     
     // Create a SDL renderer
-    renderer = SDL_CreateRenderer(window, -1, 0);
-    if (!renderer) {
+    Octo_renderer = SDL_CreateRenderer(Octo_window, -1, 0);
+    if (!Octo_renderer) {
         fprintf(stderr, "Error creating SDL renderer.\n");
         return false;
     }
@@ -45,73 +44,73 @@ bool initializeWindow(bool fullScreen) {
     return true;
 }
 
-bool initializeFrameBuffer(void) {
+bool Octo_initializeFrameBuffer(void) {
     
-    colorBuffer = (uint32_t*) malloc(sizeof(uint32_t) * windowWidth * windowHeight);
+    Octo_colorBuffer = (uint32_t*) malloc(sizeof(uint32_t) * Octo_windowWidth * Octo_windowHeight);
     
-    if (!colorBuffer) {
+    if (!Octo_colorBuffer) {
         fprintf(stderr, "Cannot allocate frame buffer");
         return false;
     }
     
-    colorBufferTexture = SDL_CreateTexture(renderer,
+    Octo_colorBufferTexture = SDL_CreateTexture(Octo_renderer,
                                            SDL_PIXELFORMAT_ARGB8888,
                                            SDL_TEXTUREACCESS_STREAMING,
-                                           windowWidth,
-                                           windowHeight);
+                                           Octo_windowWidth,
+                                           Octo_windowHeight);
 
     return true;
 }
 
 int getCBIndex(int x, int y) {
-    return y * windowWidth + x;
+    return y * Octo_windowWidth + x;
 }
 
-bool drawPixel(int x, int y, uint32_t color) {
-    if (x > 0 && x <= windowWidth && y > 0 && y <= windowHeight) {
-        colorBuffer[getCBIndex(x, y)] = color;
+bool Octo_drawPixel(int x, int y, uint32_t color) {
+    if (x > 0 && x <= Octo_windowWidth && y > 0 && y <= Octo_windowHeight) {
+        Octo_colorBuffer[getCBIndex(x, y)] = color;
         return true;
     }
     return false;
 }
 
-void drawRectangle(int x, int y, int width, int height, uint32_t color) {
+void Octo_drawRectangle(int x, int y, int width, int height, uint32_t color) {
     for (int ix = x; ix < x + width; ix++) {
         for (int iy = y; iy < y + height; iy++) {
-            drawPixel(ix, iy, color);
+            Octo_colorBuffer[getCBIndex(ix, iy)] = color;
         }
     }
 }
 
-void drawGrid(int multiple, uint32_t color) {
-    for (int y = 0; y < windowHeight; y++) {
-        for (int x = 0; x < windowWidth; x++) {
+void Octo_drawGrid(int multiple, uint32_t color) {
+    for (int y = 0; y < Octo_windowHeight; y++) {
+        for (int x = 0; x < Octo_windowWidth; x++) {
             if (y % multiple == 0 || x % multiple == 0) {
-                colorBuffer[getCBIndex(x, y)] = color;
+                Octo_drawPixel(x, y, color);
             }
         }
     }
 }
 
-void clearColorBuffer(uint32_t color) {
-    memset(colorBuffer, 0x00000000, windowWidth * windowHeight);
+void Octo_clearColorBuffer(uint32_t color) {
+    memset(Octo_colorBuffer, 0x00000000, Octo_windowWidth * Octo_windowHeight);
 //    for (int i = 0; i < windowWidth * windowHeight; i++) {
 //        colorBuffer[i] = color;
 //    }
 }
 
-void renderColorBuffer(void) {
-    SDL_UpdateTexture(colorBufferTexture,
+void Octo_renderColorBuffer(void) {
+    SDL_UpdateTexture(Octo_colorBufferTexture,
                       NULL,
-                      colorBuffer,
-                      windowWidth * sizeof(uint32_t));
-    SDL_RenderCopy(renderer, colorBufferTexture, NULL, NULL);
+                      Octo_colorBuffer,
+                      Octo_windowWidth * sizeof(uint32_t));
+    SDL_RenderCopy(Octo_renderer, Octo_colorBufferTexture, NULL, NULL);
 }
 
-void destroyWindow(void) {
-    free(colorBuffer);
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
-    SDL_DestroyTexture(colorBufferTexture);
+void Octo_destroyWindow(void) {
+    free(Octo_colorBuffer);
+    SDL_DestroyRenderer(Octo_renderer);
+    SDL_DestroyWindow(Octo_window);
+    SDL_DestroyTexture(Octo_colorBufferTexture);
     SDL_Quit();
 }

@@ -15,5 +15,7 @@
 #include "Observer.h"
 #include "V2.h"
 #include "display/display.h"
+#include "display/colors.h"
+#include "spdlog/spdlog.h"
 
 #endif /* Octo_h */

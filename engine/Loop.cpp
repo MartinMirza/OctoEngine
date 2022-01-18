@@ -17,15 +17,16 @@ void Loop::Start(const WindowParams& params)
 
 void Loop::Stop()
 {
+    currentGame->OnStopGame();
     IsRunning = false;
 }
 
 void Loop::SetupWindow(const WindowParams& params)
 {
-    windowWidth = params.Width;
-    windowHeight = params.Height;
-    initializeWindow(params.SetFullScreen);
-    initializeFrameBuffer();
+    Octo_windowWidth = params.Width;
+    Octo_windowHeight = params.Height;
+    Octo_initializeWindow(params.SetFullScreen);
+    Octo_initializeFrameBuffer();
 }
 
 void Loop::ProcessInput() const
@@ -37,15 +38,15 @@ void Loop::ProcessInput() const
     while (SDL_PollEvent(&sdlEvent))
     {
         if (sdlEvent.type == SDL_KEYUP)
-        { 
+        {
             KeyUpEvent e { sdlEvent.key.keysym.sym };
-            SUBJECT_NOTIFY_OBSERVERS(InputSubject, KeyUpEvent, e);
+            SUBJECT_NOTIFY_OBSERVERS(InputSubject, KeyUpEvent, std::move(e));
         }
 
         if (sdlEvent.type == SDL_KEYDOWN)
         {
             KeyDownEvent e { sdlEvent.key.keysym.sym };
-            SUBJECT_NOTIFY_OBSERVERS(InputSubject, KeyDownEvent, e);
+            SUBJECT_NOTIFY_OBSERVERS(InputSubject, KeyDownEvent, std::move(e));
         }
     }
 }
@@ -65,19 +66,19 @@ void Loop::Tick()
     float deltaTime = ((float)SDL_GetTicks() - tickstampFromLastFrame) / 1000.0f;
     tickstampFromLastFrame = SDL_GetTicks();
 
-    spdlog::info(std::to_string(deltaTime));
+    //spdlog::info(std::to_string(deltaTime));
     currentGame->Tick(deltaTime);
 }
 
 void Loop::Draw()
 {
-    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-    SDL_RenderClear(renderer);
-    clearColorBuffer(0x000000);
+    SDL_SetRenderDrawColor(Octo_renderer, 255, 0, 0, 255);
+    SDL_RenderClear(Octo_renderer);
+    Octo_clearColorBuffer(0x000000);
 
     currentGame->Draw();
 
-    renderColorBuffer();
-    SDL_RenderPresent(renderer);
+    Octo_renderColorBuffer();
+    SDL_RenderPresent(Octo_renderer);
 }
  

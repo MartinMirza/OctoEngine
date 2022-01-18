@@ -7,11 +7,11 @@
 
 #include <iostream>
 #include "engine/Octo.h"
-#include "TestGame.h"
+#include "games/snake/SnakeGame.hpp"
 
 int main(int argc, const char * argv[]) {
-    TestGame t;
-    Octo::Loop loop(&t);
+    SnakeGame g;
+    Octo::Loop loop(&g);
     Octo::WindowParams w;
     w.SetFullScreen = false;
     w.Height = 600;

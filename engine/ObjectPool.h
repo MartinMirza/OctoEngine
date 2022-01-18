@@ -6,93 +6,107 @@
 #include <unordered_map>
 #include <concepts>
 
-namespace Octo 
+namespace Octo
 {
-	template <typename TObject>
-	concept HasResetMethod = requires(TObject t)
-	{
-		{ t.Reset() };
-	};
+    template <typename TObject>
+    concept HasResetMethod = requires(TObject t)
+    {
+        { t.Reset() };
+    };
 
-	template <typename TObject>
-		requires HasResetMethod<TObject>
-	class ObjectPool
-	{
-	public:
-		ObjectPool(int size) : poolSize(size)
-		{
-			InitializePool();
-		}
-		~ObjectPool()
-		{
-			for (int index = 0; index < poolSize; index++)
-			{
-				delete pool[index];
-			}
+    template <typename TObject>
+        requires HasResetMethod<TObject>
+    class ObjectPool
+    {
+    public:
+        ObjectPool(int size) : poolSize(size)
+        {
+            pool = new TObject* [poolSize];
+            inUse = new bool [poolSize];
 
-			delete[] pool;
-			delete[] inUse;
-		}
-		ObjectPool(const ObjectPool& source)
-		{
-			poolSize = source.poolSize;
-			InitializePool();
-		}
-		ObjectPool& operator =(const ObjectPool& source)
-		{
-			if (&source == this)
-			{
-				return *this;
-			}
+            for (int index = 0; index < poolSize; index++)
+            {
+                TObject* newObject = new TObject();
 
-			poolSize = source.poolSize;
-			InitializePool();
-		}
-		TObject* const GetObject()
-		{
-			for (int index = 0; index < poolSize; index++)
-			{
-				if (inUse[index] == false)
-				{
-					inUse[index] = true;
-					return pool[index];
-				}
-			}
+                pool[index] = newObject;
+                inUse[index] = false;
+                ptrToIndex.insert(std::make_pair(reinterpret_cast<std::uintptr_t>(newObject), index));
+            }
+        }
+        ~ObjectPool()
+        {
+            for (int index = 0; index < poolSize; index++)
+            {
+                delete pool[index];
+            }
 
-			return nullptr;
-		}
-		void ReturnObject(TObject* objectPtr)
-		{
-			auto iterator = ptrToIndex.find(reinterpret_cast<std::uintptr_t>(objectPtr));
+            delete[] pool;
+            delete[] inUse;
+            
+            pool = nullptr;
+            inUse = nullptr;
+        }
+        ObjectPool(const ObjectPool& source)
+        {
+            poolSize = source.poolSize;
+            
+            pool = new TObject* [poolSize];
+            inUse = new TObject* [poolSize];
+            
+            for (int index = 0; index < poolSize; index++)
+            {
+                TObject* newObject = new TObject(source.pool[index]);
+                inUse[index] = source.inUse[index];
+                ptrToIndex.insert(std::make_pair(reinterpret_cast<std::uintptr_t>(newObject), index));
+            }
+        }
+        ObjectPool& operator =(const ObjectPool& source)
+        {
+            if (&source == this)
+            {
+                return *this;
+            }
+            
+            for (int index = 0; index < poolSize; index++)
+            {
+                delete pool[index];
+            }
 
-			if (iterator != ptrToIndex.end())
-			{
-				int index = iterator->second;
-				objectPtr->Reset();
-				inUse[index] = false;
-			}
-		}
-	private:
-		int poolSize = 0;
-		TObject** pool;
-		bool* inUse;
-		std::unordered_map<std::uintptr_t, int> ptrToIndex;
+            delete[] pool;
+            delete[] inUse;
 
-		void InitializePool()
-		{
-			pool = new TObject* [poolSize];
-			inUse = new bool [poolSize];
+            return *this = ObjectPool(source.poolSize);
+        }
+        TObject* const GetObject()
+        {
+            for (int index = 0; index < poolSize; index++)
+            {
+                if (inUse[index] == false)
+                {
+                    inUse[index] = true;
+                    return pool[index];
+                }
+            }
 
-			for (int index = 0; index < poolSize; index++)
-			{
-				TObject* newObject = new TObject();
+            return nullptr;
+        }
+        void ReturnObject(TObject* objectPtr)
+        {
+            auto iterator = ptrToIndex.find(reinterpret_cast<std::uintptr_t>(objectPtr));
 
-				pool[index] = newObject;
-				inUse[index] = false;
-				ptrToIndex.insert(std::make_pair(reinterpret_cast<std::uintptr_t>(newObject), index));
-			}
-		}
-	};
+            if (iterator != ptrToIndex.end())
+            {
+                int index = iterator->second;
+                objectPtr->Reset();
+                inUse[index] = false;
+            }
+        }
+    private:
+        int poolSize = 0;
+        TObject** pool;
+        bool* inUse;
+        std::unordered_map<std::uintptr_t, int> ptrToIndex;
+    };
 }
 
 #endif

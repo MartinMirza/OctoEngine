@@ -37,6 +37,7 @@ namespace Octo
 	class ObserverSubject
 	{
 	public:
+        ObserverSubject(int poolSize) : nodePool(poolSize) {}
 		void AddObserver(IObserver<TEvent>* observerPtr)
 		{
 			ObserverNode<TEvent>* newNode = nodePool.GetObject();
@@ -59,7 +60,7 @@ namespace Octo
 				if (currentNodePtr->NextNodePtr->ObserverPtr == observerPtr)
 				{
 					currentNodePtr->NextNodePtr = currentNodePtr->NextNodePtr->NextNodePtr;
-					nodePool.ReturnObject(currentNodePtr->NextNodeObject);
+					nodePool.ReturnObject(currentNodePtr->NextNodePtr);
 					return;
 				}
 
@@ -75,10 +76,20 @@ namespace Octo
 				currentNodePtr = currentNodePtr->NextNodePtr;
 			}
 		}
+        
+        void Notify(TEvent&& payload)
+        {
+            ObserverNode<TEvent>* currentNodePtr = headNodePtr;
+            while (currentNodePtr != nullptr)
+            {
+                currentNodePtr->ObserverPtr->OnNotify(std::move(payload));
+                currentNodePtr = currentNodePtr->NextNodePtr;
+            }
+        }
 
 	private:
 		ObserverNode<TEvent>* headNodePtr;
-		static ObjectPool<ObserverNode<TEvent>> nodePool;
+		ObjectPool<ObserverNode<TEvent>> nodePool;
 	};
 }
 

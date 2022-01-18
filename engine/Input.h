@@ -20,6 +20,8 @@ namespace Octo
 
 	class Input : public ObserverSubject<KeyDownEvent>, public ObserverSubject<KeyUpEvent>
 	{
+    public:
+        Input(int keyDownEventPoolSize, int keyUpDownEventPoolSize);
 	};
 
 	extern Input InputSubject;
