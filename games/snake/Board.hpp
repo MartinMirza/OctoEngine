@@ -32,7 +32,7 @@ public:
     const Octo::Vec2Int& GetCellSize() const;
     int GetGridLength() const;
     void ClearGrid();
-    void UpdateBoard(const Octo::Vec2Int& position, const BoardCell& cell);
+    void SetCell(const Octo::Vec2Int& position, const BoardCell& cell);
     void Draw() const;
 private:
     std::vector<std::unique_ptr<BoardCell>> grid;

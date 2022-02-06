@@ -53,7 +53,7 @@ void Board::ClearGrid() {
 }
 
 
-void Board::UpdateBoard(const Octo::Vec2Int& position, const BoardCell& boardCell) {
+void Board::SetCell(const Octo::Vec2Int& position, const BoardCell& boardCell) {
         int index = width * position.Y + position.X;
         if (gridLength > index && index > 0) {
             *grid[index] = boardCell;

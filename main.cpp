@@ -8,6 +8,8 @@
 #include <iostream>
 #include "engine/Octo.h"
 #include "games/snake/SnakeGame.hpp"
+#include "spdlog/spdlog.h"
+
 
 int main(int argc, const char * argv[]) {
     SnakeGame g;
